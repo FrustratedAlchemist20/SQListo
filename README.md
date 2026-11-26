@@ -6,6 +6,8 @@
 
 [![GitHub release](https://img.shields.io/github/v/release/FrustratedAlchemist20/SQListo?include_prereleases)](https://github.com/FrustratedAlchemist20/SQListo/releases)
 
+[![DOI](https://zenodo.org/badge/github/1473396643.svg)](https://doi.org/10.5281/zenodo.24568313)
+
 
 # SQListo
 
@@ -241,6 +243,14 @@ The software aims to facilitate the reproducible analysis of large molecular dyn
 
 Under active development and scientific validation.
 
-## Citation
+## Scientific Citation
 
-Citation information will be provided with the first versioned release.
+If you use SQListo in your research, please cite the corresponding software release archived in Zenodo.
+
+**Pérez Tabero, S. (2026).** SQListo: An AI Assistant for the Storage and Analysis of Molecular Dynamics Trajectories. Zenodo.
+
+**DOI:** [10.5281/zenodo.24568313](https://doi.org/10.5281/zenodo.24568313)
+
+Citation metadata is also available in the `CITATION.cff` file.
+
+SQListo was developed as part of doctoral research in theoretical and computational chemistry at the Universidad Autónoma de Madrid (UAM).
