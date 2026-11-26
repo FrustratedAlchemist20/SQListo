@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+
+message: "If you use SQListo in your research, please cite this software."
+
+title: "SQListo: An AI Assistant for the Storage and Analysis of Molecular Dynamics Trajectories"
+
+type: software
+
+authors:
+  - family-names: "Pérez Tabero"
+    given-names: "Sergio"
+    affiliation: "Universidad Autónoma de Madrid"
+
+version: "0.2.0"
+
+license: MIT
+
+repository-code: "https://github.com/FrustratedAlchemist20/SQListo"
+
+url: "https://github.com/FrustratedAlchemist20/SQListo"
+
+abstract: >
+  SQListo is a scientific software platform for the compressed
+  storage, retrieval and analysis of molecular dynamics trajectories
+  using SQLite databases and a locally deployed artificial
+  intelligence assistant. The software integrates molecular
+  fragmentation analysis, reaction classification, theoretical
+  mass spectrum construction, feature extraction and kinetic
+  analysis with natural language database interaction.
+
+keywords:
+  - molecular dynamics
+  - computational chemistry
+  - theoretical chemistry
+  - artificial intelligence
+  - large language models
+  - SQLite
+  - molecular fragmentation
+  - mass spectrometry
+  - chemical kinetics
+  - scientific software
+  - TeraChem
+  - VENUS
+

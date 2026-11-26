@@ -7,7 +7,13 @@
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-LLAMA_SERVER="${LLAMA_SERVER:-$HOME/llama.cpp/build/bin/llama-server}"
+LOCAL_LLAMA_SERVER="$PROJECT_DIR/.local/llama.cpp/build/bin/llama-server"
+
+if [[ -x "$LOCAL_LLAMA_SERVER" ]]; then
+    LLAMA_SERVER="${LLAMA_SERVER:-$LOCAL_LLAMA_SERVER}"
+else
+    LLAMA_SERVER="${LLAMA_SERVER:-$HOME/llama.cpp/build/bin/llama-server}"
+fi
 
 MODEL="${MODEL:-$PROJECT_DIR/modelos_IA/qwen2.5-coder-1.5b/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf}"
 

@@ -68,3 +68,13 @@ tests/work/
 
 # Local installation configuration
 config.local.*
+
+# Locally installed inference engine
+.local/
+
+# Partial downloads
+*.part
+
+# Downloaded database checksum
+DBs/SHA256SUMS
+DBs/.download.*/

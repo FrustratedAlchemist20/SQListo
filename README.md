@@ -1,3 +1,12 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+
+[![Tests](https://github.com/FrustratedAlchemist20/SQListo/actions/workflows/tests.yml/badge.svg)](https://github.com/FrustratedAlchemist20/SQListo/actions)
+
+[![GitHub release](https://img.shields.io/github/v/release/FrustratedAlchemist20/SQListo?include_prereleases)](https://github.com/FrustratedAlchemist20/SQListo/releases)
+
+
 # SQListo
 
 ### An AI Assistant for the Storage and Analysis of Molecular Dynamics Trajectories
@@ -45,22 +54,73 @@ The local AI assistant uses:
 
 The model is executed locally and does not require a commercial AI API.
 
-## Installation
+## Quick Installation
 
-Clone the repository:
+SQListo provides an automated installer for Linux systems.
+
+### System Requirements
+
+- Linux operating system.
+- Python 3.11.
+- Git.
+- CMake and a compatible C/C++ compiler.
+- Make.
+- curl.
+- Internet connection during installation.
+- Sufficient disk space for the database, language model and inference engine.
+
+### Automated Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/SQListo.git
+git clone https://github.com/FrustratedAlchemist20/SQListo.git
+
 cd SQListo
+
+bash install.sh
 ```
 
-Create a Python environment and install the dependencies:
+The installer creates an isolated Python environment, installs the required dependencies, builds llama.cpp, downloads the pretrained language model and demonstration database, and executes the regression tests.
+
+### Getting Started
+
+Activate the Python environment:
 
 ```bash
-python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
 ```
+
+Start the local inference server:
+
+```bash
+bash start_sqlisto_llama_server.sh
+```
+
+Display the available scientific commands:
+
+```bash
+python main.py --help
+```
+
+Query the demonstration dataset:
+
+```bash
+python sqlisto_agent.py DBs/azc_dfcz_ub3_z3.db \
+    "How many trajectories are stored for each molecule?"
+```
+
+## Citation
+
+If you use SQListo in academic research, please cite the software using the citation metadata available in `CITATION.cff`.
+
+## License
+
+The SQListo source code is released under the MIT License.
+
+External software, pretrained language models and scientific datasets are subject to their respective licensing terms. See `THIRD_PARTY_NOTICES.md` for further information.
+
+## Disclaimer
+
+SQListo is research software. AI-generated queries and scientific interpretations should be independently validated before being used in scientific publications.
 
 The AI assistant additionally requires a compatible llama.cpp installation and the corresponding GGUF model.
 

@@ -23,9 +23,16 @@ DEFAULT_MODEL = str(
     / "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
 )
 
-DEFAULT_LLAMA_BIN = str(
-    Path.home() / "llama.cpp/build/bin/llama-cli"
+LOCAL_LLAMA_BIN = (
+    BASE_DIR / ".local/llama.cpp/build/bin/llama-cli"
 )
+
+DEFAULT_LLAMA_BIN = str(
+    LOCAL_LLAMA_BIN
+    if LOCAL_LLAMA_BIN.is_file()
+    else Path.home() / "llama.cpp/build/bin/llama-cli"
+)
+
 
 DEFAULT_KNOWLEDGE_FILE = str(
     Path(__file__).resolve().with_name("sqlisto_knowledge.txt")
