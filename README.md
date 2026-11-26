@@ -165,6 +165,40 @@ python sqlisto_agent.py DBs/azc_dfcz_ub3_z3.db \
     "Show the stored global kinetic constants for Azaconazole."
 ```
 
+## Full Installation Validation
+
+SQListo provides an automated smoke test to validate the complete local installation.
+
+After installing the software, execute:
+
+```bash
+bash scripts/smoke_test.sh
+```
+
+The smoke test performs 14 checks covering:
+
+- Python environment and dependencies.
+- Source code compilation and regression tests.
+- SHA-256 verification of the pretrained language model.
+- SQLite database integrity and scientific dataset validation.
+- XYZ2DB scientific analysis engine.
+- llama.cpp executable validation.
+- Local inference server startup.
+- Direct language model inference.
+- Natural language SQL queries.
+- LLM-based scientific tool routing.
+- Retrieval of stored kinetic constants.
+
+The test uses an independent temporary database and an isolated inference server. The original scientific database is not modified.
+
+Individual test logs and a summary report are saved in:
+
+`outputs/smoke_tests/`
+
+A successful execution returns an exit status of zero. Failed or skipped tests return a non-zero exit status.
+
+The demonstration dataset is required for full validation. This smoke test does not replace comprehensive scientific validation of the underlying computational methods.
+
 ## Demonstration Dataset
 
 The demonstration dataset contains molecular dynamics simulations of two triazole fungicides.
@@ -180,6 +214,8 @@ All trajectories in this dataset are labelled uB3LYP and ZPEx3.
 The dataset includes simulation inputs, compressed molecular coordinates, fragmentation results, reaction classifications and kinetic analyses.
 
 Database and model files are distributed separately from the source code.
+
+
 
 ## Testing
 
