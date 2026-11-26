@@ -227,6 +227,46 @@ Run the regression tests with:
 python -m unittest discover -s tests -v
 ```
 
+## Practical AI Tutorial
+
+Learn how to use SQListo through practical computational chemistry examples:
+
+[Full AI Assistant Tutorial](docs/AI_TUTORIAL.md)
+
+The tutorial covers:
+
+- Molecular dynamics database exploration.
+- Natural language SQL queries.
+- Molecular fragmentation.
+- Reaction frequencies.
+- Fragment searches.
+- Theoretical mass spectra.
+- Global fragmentation kinetics.
+- Trajectory and simulation input recovery.
+- CSV and XYZ exports.
+- English and Spanish interaction.
+- Local AI tool routing.
+
+To run an automated scientific demonstration, start the local inference server:
+
+```bash
+bash start_sqlisto_llama_server.sh
+```
+
+Then execute:
+
+```bash
+bash examples/run_ai_examples.sh
+```
+
+To validate the complete software installation:
+
+```bash
+bash scripts/smoke_test.sh
+```
+
+All language model inference is performed locally.
+
 ## Documentation
 
 - `README_sqlisto_agent.md`: AI assistant documentation.
