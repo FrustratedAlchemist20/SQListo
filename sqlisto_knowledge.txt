@@ -1,0 +1,398 @@
+XYZ2DB SEMANTIC MANUAL
+
+The real SQLite schema supplied with each request is always the final
+authority for exact table and column names.
+
+============================================================
+TRAJECTORIES
+============================================================
+
+trajectories is the central table.
+
+One row normally represents one complete molecular-dynamics trajectory.
+
+Important fields may include:
+
+- traj_uid:
+  Unique trajectory identifier.
+
+- traj_code:
+  Human-readable trajectory code.
+
+- molecule:
+  Studied molecule.
+
+- isomer:
+  Isomeric or stereochemical label.
+
+- method_label:
+  Computational method.
+
+- energy_label:
+  Energy or simulation-condition label.
+
+- run_id:
+  Simulation number.
+
+- natoms:
+  Number of atoms.
+
+- nframes:
+  Number of stored frames.
+
+- input_id:
+  Link to md_inputs.
+
+Use trajectories for:
+
+- counting trajectories;
+- grouping trajectories by molecule;
+- grouping trajectories by method;
+- grouping trajectories by energy;
+- filtering by molecule, isomer, method or energy;
+- comparing nframes;
+- listing trajectory identifiers.
+
+============================================================
+GROUPING INTERPRETATION
+============================================================
+
+Expressions such as:
+
+- por molécula
+- para cada molécula
+- agrupado por molécula
+- by molecule
+- for each molecule
+- grouped by molecule
+
+mean that the result must contain one row for every molecule.
+
+Correct:
+
+SELECT
+    molecule,
+    COUNT(*) AS n_trajectories
+FROM trajectories
+GROUP BY molecule;
+
+Incorrect:
+
+SELECT COUNT(DISTINCT molecule)
+FROM trajectories;
+
+COUNT(DISTINCT molecule) answers how many different molecules exist.
+It does not answer how many trajectories exist for each molecule.
+
+Apply the same rule to:
+
+- method_label;
+- energy_label;
+- isomer;
+- formula;
+- reaction identifiers;
+- other grouping categories.
+
+============================================================
+MD INPUTS
+============================================================
+
+md_inputs contains parsed simulation-input parameters.
+
+Possible concepts include:
+
+- basis;
+- charge;
+- spinmult;
+- method;
+- dispersion;
+- run_type;
+- nstep;
+- timestep;
+- thermostat;
+- rescalefreq;
+- tinit;
+- t0;
+- gpus.
+
+Relationship:
+
+trajectories.input_id = md_inputs.input_id
+
+The timestep is normally expressed in femtoseconds.
+
+When frame number and timestep are available:
+
+time_ps = frame_number * timestep_fs / 1000
+
+============================================================
+FRAME BLOCKS
+============================================================
+
+frame_blocks stores compressed trajectory frames.
+
+Important concepts:
+
+- traj_uid links a block to a trajectory;
+- block_index gives block order;
+- start_frame and end_frame delimit the block;
+- payload is a compressed BLOB.
+
+payload may contain coordinates, comments and frame energies.
+
+Ordinary SQL cannot chemically interpret payload.
+
+Questions requiring any of the following need a Python tool:
+
+- coordinate reconstruction;
+- bond detection;
+- connectivity analysis;
+- fragment detection for each frame;
+- first appearance of a fragment;
+- disappearance time;
+- event geometry extraction;
+- energy at a specific fragmentation event.
+
+For these questions return:
+
+SELECT
+    'PYTHON_TOOL_REQUIRED' AS status,
+    'tool_name' AS tool,
+    'brief reason' AS reason;
+
+Suggested tools:
+
+- fragment_first_appearance
+- fragment_timeline
+- extract_event_frame
+- trajectory_energy_timeline
+- persistent_fragmentation_event
+
+============================================================
+FRAGMENTS
+============================================================
+
+fragments stores individual fragment records.
+
+A trajectory may produce several fragment rows.
+
+Important concepts may include:
+
+- traj_uid:
+  Parent trajectory identifier.
+
+- formula:
+  Fragment molecular formula.
+
+- exact_mass:
+  Exact fragment mass.
+
+- charge_guess:
+  Estimated fragment charge.
+
+Important relationship:
+
+fragments.traj_uid = trajectories.traj_uid
+
+fragments may not contain:
+
+- molecule;
+- method_label;
+- energy_label;
+- isomer.
+
+To access those values, join with trajectories through traj_uid.
+
+Example: trajectories containing Cl+ by molecule
+
+SELECT
+    t.molecule,
+    COUNT(DISTINCT f.traj_uid) AS n_trajectories_with_cl_plus
+FROM fragments AS f
+JOIN trajectories AS t
+    ON t.traj_uid = f.traj_uid
+WHERE f.formula = 'Cl+'
+GROUP BY t.molecule;
+
+Use COUNT(*) when counting fragment records.
+
+Use COUNT(DISTINCT traj_uid) when counting trajectories containing
+a fragment.
+
+============================================================
+CHARGED FRAGMENTS
+============================================================
+
+"Charged fragments", "fragmentos cargados" and equivalent expressions
+mean any fragment with non-zero charge.
+
+They do not mean Cl+.
+
+Never interpret "charged fragments" as:
+
+formula = 'Cl+'
+
+unless the user explicitly mentions Cl+.
+
+For trajectory-level questions about whether a trajectory contains one
+or more charged fragments, prefer trajectory_features when the real
+schema contains charged_fragment_count.
+
+Example:
+
+SELECT
+    molecule,
+    COUNT(*) AS n_trajectories_with_charged_fragments
+FROM trajectory_features
+WHERE charged_fragment_count > 0
+GROUP BY molecule;
+
+If trajectory_features lacks molecule, join it with trajectories using
+traj_uid.
+
+When using fragments directly, only use a real charge column if it
+exists in the schema.
+
+Possible pattern:
+
+SELECT
+    t.molecule,
+    COUNT(DISTINCT f.traj_uid) AS n_trajectories_with_charged_fragments
+FROM fragments AS f
+JOIN trajectories AS t
+    ON t.traj_uid = f.traj_uid
+WHERE f.charge_guess IS NOT NULL
+  AND f.charge_guess <> 0
+GROUP BY t.molecule;
+
+Do not infer charge from the presence or absence of a plus symbol unless
+the user asks for a specific formula.
+
+============================================================
+TRAJECTORY FEATURES
+============================================================
+
+trajectory_features contains aggregated descriptors for complete
+trajectories.
+
+One row normally represents one trajectory.
+
+Possible fields may include:
+
+- traj_uid;
+- molecule;
+- method_label;
+- energy_label;
+- charged_fragment_count;
+- neutral_fragment_count;
+- contains_hcl;
+- contains_h_plus;
+- contains_h2;
+- contains_ch3_plus;
+- contains_c2h5_plus.
+
+The real schema is always authoritative.
+
+Use trajectory_features for trajectory-level questions involving:
+
+- existence of charged fragments;
+- existence of neutral fragments;
+- HCl detection;
+- H+ detection;
+- aggregated reaction or fragmentation descriptors.
+
+============================================================
+REACTIONS
+============================================================
+
+Possible tables include:
+
+- reaction_summary;
+- reaction_members;
+- reaction_fragments.
+
+General interpretation:
+
+- reaction_summary stores aggregated reaction information;
+- reaction_members connects reactions with trajectories;
+- reaction_fragments stores fragments associated with reactions.
+
+Use only relationships supported by the real schema.
+
+Never invent reaction joins.
+
+============================================================
+SCIENTIFIC COUNTING RULES
+============================================================
+
+COUNT(*) counts rows.
+
+COUNT(DISTINCT traj_uid) counts different trajectories.
+
+COUNT(DISTINCT formula) counts different fragment formulas.
+
+AVG(column) calculates a mean.
+
+MIN(column) calculates a minimum.
+
+MAX(column) calculates a maximum.
+
+SUM(column) calculates a total.
+
+Distinguish carefully between:
+
+- number of fragment records;
+- number of trajectories containing a fragment;
+- number of different formulas;
+- number of different molecules;
+- number of trajectories for each molecule.
+
+============================================================
+LANGUAGE
+============================================================
+
+The user may ask in Spanish, English or another language.
+
+Interpret semantic equivalence, for example:
+
+- trayectoria / trajectory / run;
+- molécula / molecule / compound;
+- método / method;
+- fragmento cargado / charged fragment;
+- contiene / contains;
+- por molécula / by molecule / for each molecule;
+- promedio / mean / average;
+- tiempo de aparición / first appearance time.
+
+Do not rely on exact words. Interpret the complete scientific intent.
+
+============================================================
+DECISION RULE
+============================================================
+
+Use SQL when the answer already exists in relational columns.
+
+Use PYTHON_TOOL_REQUIRED when the answer requires:
+
+- decompressing payload;
+- reconstructing coordinates;
+- calculating connectivity;
+- detecting fragments frame by frame;
+- finding first appearance time;
+- extracting event geometry;
+- recalculating kinetics;
+- recalculating spectra;
+- performing scientific analysis not stored relationally.
+
+============================================================
+FINAL PRIORITY
+============================================================
+
+Use this priority order:
+
+1. Real SQLite schema.
+2. Explicit foreign keys.
+3. This semantic manual.
+4. Conservative scientific reasoning.
+5. Never invent missing information.
+

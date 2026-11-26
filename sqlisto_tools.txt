@@ -1,0 +1,233 @@
+SQLISTO AGENT TOOL MANUAL
+
+The agent selects exactly one tool for each request.
+
+============================================================
+sql_query
+============================================================
+
+Use for relational questions that can be answered directly from SQLite.
+
+============================================================
+database_summary
+============================================================
+
+Use for a general overview of trajectories, frames, molecules, isomers,
+methods, energies and stored fragment analyses.
+
+Filters:
+- molecule
+- isomer
+- method
+- energy_label
+
+============================================================
+reaction_summary / reaction_export_csv
+============================================================
+
+Use for common final-frame fragmentation patterns and their export.
+
+Filters:
+- molecule
+- isomer
+- method
+- energy_label
+
+============================================================
+fragment_search
+============================================================
+
+Search stored final-frame fragments by formula or exact mass.
+
+============================================================
+mass_spectrum / mass_spectrum_export_csv
+============================================================
+
+Build or export theoretical spectra from stored final fragments.
+
+============================================================
+global_kinetics / global_kinetics_export_csv
+============================================================
+
+Calculate global persistent disappearance kinetics of the precursor.
+
+Filters:
+- molecule
+- isomer
+- method
+- energy_label
+
+============================================================
+fragment_first_appearance
+============================================================
+
+Calculate the distribution of first persistent appearance times of one
+fragment across selected trajectories.
+
+============================================================
+export_fragment_event_trajectory
+============================================================
+
+Select the trajectory whose first persistent fragment appearance is
+earliest or latest and export:
+
+- complete XYZ;
+- frame energy/time CSV;
+- selected event CSV;
+- all events CSV.
+
+============================================================
+export_trajectory
+============================================================
+
+Export one trajectory selected only by metadata.
+
+Filters:
+- molecule
+- isomer
+- method
+- energy_label
+
+selection:
+- first
+- last
+- random
+- longest
+- shortest
+
+"Any trajectory" defaults to first for reproducibility.
+
+============================================================
+export_trajectory_with_fragment
+============================================================
+
+Export one trajectory containing a requested fragment.
+
+fragment_scope:
+- final_frame
+- any_frame
+- persistent
+
+selection:
+- first
+- last
+- random
+- longest
+- shortest
+- earliest
+- latest
+
+earliest/latest require a frame-by-frame scope.
+
+============================================================
+export_all_trajectories_with_fragment
+============================================================
+
+Export all matching trajectories containing a fragment.
+
+It creates:
+- one folder per trajectory;
+- one complete XYZ per trajectory;
+- one frame energy/time CSV per trajectory;
+- one manifest.csv.
+
+Filters:
+- molecule
+- isomer
+- method
+- energy_label
+
+If a filter is null, all values are included.
+
+fragment_scope:
+- final_frame
+- any_frame
+- persistent
+
+max_exports limits the number of actual file exports. The manifest still
+lists every match.
+
+============================================================
+ISOMERS
+============================================================
+
+Every relevant tool supports the isomer filter when the database stores
+isomer labels such as:
+
+- E
+- Z
+- cis
+- trans
+
+The agent must use the exact value present in the database catalog.
+
+============================================================
+SCIENTIFIC CONVENTIONS
+============================================================
+
+Fragment formulas and charges follow the accepted XYZ2DB build_formula
+and charge_guess convention.
+
+final_frame uses the fragments already stored from the final analysed
+frame.
+
+any_frame scans all trajectory frames and accepts one detected frame.
+
+persistent scans all trajectory frames and requires the fragment for
+persist_frames consecutive frames.
+
+============================================================
+compare_global_kinetics
+============================================================
+
+Use whenever the user requests global disappearance rate constants for
+more than one molecule, isomer, method, or energy label, or explicitly
+asks for a comparison.
+
+Required routing arguments:
+
+- compare_by: molecule, isomer, method, or energy_label
+- values: list of at least two database values
+
+For molecule comparisons, the router may use the alias:
+
+- molecules: [value_1, value_2, ...]
+
+Optional arguments:
+
+- persist_frames
+- window_mode: censor or common
+- min_points
+- export_csv
+
+The tool calculates each group independently. It must never discard a
+second requested molecule or other comparison group.
+
+When export_csv is true, it creates:
+
+- one combined comparison CSV;
+- one kinetics summary CSV per group;
+- one trajectory-events CSV per group;
+- one survival-curve CSV per group.
+
+Example:
+
+User:
+Compare the global rate constants of Difenoconazole and Azaconazole at
+ZPEx3 using 100 persistent frames and export the complete CSV analysis.
+
+Plan:
+
+{
+  "action": "compare_global_kinetics",
+  "arguments": {
+    "compare_by": "molecule",
+    "molecules": ["Difenoconazole", "Azaconazole"],
+    "method": "uB3LYP",
+    "energy_label": "ZPEx3",
+    "persist_frames": 100,
+    "window_mode": "censor",
+    "export_csv": true
+  }
+}
+

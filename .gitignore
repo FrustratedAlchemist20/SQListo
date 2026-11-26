@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.db-journal
+
+# AI model weights
+*.gguf
+*.safetensors
+*.pt
+*.pth
+.cache/
+
+# Generated results
+outputs/
+auditoria_canales_*/
+zpe_resultados/
+
+# Temporary files
+*.log
+*.pid
+*.tmp
+*.zip
+*.tar
+*.tar.gz
+
+# Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+
+# Operating systems
+.DS_Store
+Thumbs.db
+
+# SQLite auxiliary files
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Testing databases
+tests/work/
+
+# Local installation configuration
+config.local.*
