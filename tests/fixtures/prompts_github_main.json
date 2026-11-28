@@ -1,0 +1,102 @@
+{
+  "source_repository": "https://github.com/FrustratedAlchemist20/SQListo",
+  "source_commit": "f3b557e20cbf2b5cfa2cbd3978600135533dfffa",
+  "description": "Prompt payloads produced by GitHub main before externalization, independently verified from git show. Review deliberate instruction changes before updating these snapshots.",
+  "cases": [
+    {
+      "builder": "build_router_prompt",
+      "arguments": {
+        "question": "Exporta el fragmento C2H3N3 de Azaconazole PM6 ZPEx3.",
+        "tools_manual": "manual",
+        "catalog": {
+          "molecules": [
+            "Azaconazole",
+            "Difenoconazole"
+          ],
+          "methods": [
+            "PM6",
+            "uB3LYP"
+          ],
+          "isomers": [
+            "cis",
+            "trans"
+          ],
+          "energy_labels": [
+            "ZPEx2.5",
+            "ZPEx3"
+          ]
+        }
+      },
+      "sha256": "9896d9ed7536079c2cbf633b359cbc766111f30b6b3f5756263ab7a344dc4dc2",
+      "characters": 5440
+    },
+    {
+      "builder": "build_router_prompt",
+      "arguments": {
+        "question": "literal ${schema} {a: 1} \\ $ átomos\nsegunda línea",
+        "tools_manual": "",
+        "catalog": {}
+      },
+      "sha256": "502586ab17a7c21668a359585d562998dff889b7197969f55b4d926fc9ffbbd5",
+      "characters": 5303
+    },
+    {
+      "builder": "build_router_prompt",
+      "arguments": {
+        "question": "Which trajectory contains C4H9+?",
+        "tools_manual": "different unused manual",
+        "catalog": {
+          "molecules": [
+            "Molécula con acento"
+          ]
+        }
+      },
+      "sha256": "9a03c1c61da8c4b11b7ad6f93eaec2b149e2cd13468d847e505ef2778f18d5af",
+      "characters": 5321
+    },
+    {
+      "builder": "build_prompt",
+      "arguments": {
+        "schema": "TABLE trajectories (traj_uid TEXT, molecule TEXT, nframes INTEGER)",
+        "question": "¿Cuántas trayectorias hay por molécula? ${schema} {literal}\nñ",
+        "knowledge": ""
+      },
+      "sha256": "abbce4e334a83d63152285578387d92c2f11fdb5c0e9011e9f8db7e22ff9df66",
+      "characters": 4929
+    },
+    {
+      "builder": "build_prompt",
+      "arguments": {
+        "schema": "TABLE trajectories (traj_uid TEXT, molecule TEXT, nframes INTEGER)",
+        "question": "¿Cuántas trayectorias hay por molécula? ${schema} {literal}\nñ",
+        "knowledge": "Manual semántico: ${question}; {json}; charge != 0."
+      },
+      "sha256": "2f464288096b62c32dfb2f61dfbfb2fd91bed23976ef417658529e058337121d",
+      "characters": 4939
+    },
+    {
+      "builder": "build_repair_prompt",
+      "arguments": {
+        "schema": "TABLE trajectories (traj_uid TEXT, molecule TEXT, nframes INTEGER)",
+        "question": "¿Cuántas trayectorias hay por molécula? ${schema} {literal}\nñ",
+        "knowledge": "",
+        "rejected_sql": "SELECT wrong FROM trajectories;",
+        "sqlite_error": "no such column: wrong {literal} $x"
+      },
+      "sha256": "5694d0019e6ab49eb4da5781f6e94ba897c8c33320333286a8595bccf907a640",
+      "characters": 1362
+    },
+    {
+      "builder": "build_repair_prompt",
+      "arguments": {
+        "schema": "TABLE trajectories (traj_uid TEXT, molecule TEXT, nframes INTEGER)",
+        "question": "¿Cuántas trayectorias hay por molécula? ${schema} {literal}\nñ",
+        "knowledge": "Manual semántico: ${question}; {json}; charge != 0.",
+        "rejected_sql": "SELECT wrong FROM trajectories;",
+        "sqlite_error": "no such column: wrong {literal} $x"
+      },
+      "sha256": "92fad3b431e91ec644c58395a5cdcad6c440dbbe5d9c63d1267876e56201c41d",
+      "characters": 1372
+    }
+  ]
+}

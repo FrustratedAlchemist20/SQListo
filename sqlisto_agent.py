@@ -15,6 +15,8 @@ from typing import Any
 
 import pandas as pd
 
+from sqlisto_prompts import build_router_prompt
+
 import xyz2db_assistant as xyz2db_llm
 
 from xyz2db_assistant import (
@@ -614,110 +616,6 @@ def should_route_directly_to_sql(question: str) -> bool:
     )
     return any(signal in text for signal in sql_signals)
 
-
-def build_router_prompt(question: str, tools_manual: str,
-                        catalog: dict[str, list[str]]) -> str:
-    """Build a compact routing prompt.
-
-    The previous prompt repeated the full tools manual and many examples,
-    exceeding 4k tokens. This compact version keeps only the routing decisions
-    that the model actually needs. The deterministic normalizer still applies
-    additional safeguards after routing.
-    """
-    del tools_manual  # Kept in the signature for backwards compatibility.
-    catalog_json = json.dumps(catalog, ensure_ascii=False, separators=(",", ":"))
-
-    return f"""<|im_start|>system
-You are SQListo Agent, an offline router for a computational-chemistry SQLite database.
-Return exactly one JSON object and nothing else.
-
-Allowed actions:
-sql_query, show_input, restore_input, database_summary,
-reaction_summary, reaction_export_csv,
-fragment_search, final_fragment_atoms, final_fragment_bond_query,
-mass_spectrum, mass_spectrum_export_csv, global_kinetics,
-global_kinetics_export_csv, compare_global_kinetics,
-stored_kinetics_summary, stored_kinetics_export_csv,
-stored_kinetics_detailed_export_csv,
-fragment_first_appearance, export_fragment_event_trajectory,
-export_trajectory, export_trajectory_with_fragment,
-export_all_trajectories_with_fragment.
-
-Routing rules:
-- sql_query: custom counts, lists, filters, GROUP BY, averages, rankings,
-  percentages, comparisons, existence checks, and queries over stored columns.
-  For sql_query always return arguments={{}}.
-- show_input: print the complete stored input associated with an exact traj_uid.
-- restore_input: write the stored input associated with an exact traj_uid to a file.
-  Include filename only when the user explicitly provides a simple filename.
-- database_summary: only a broad predefined overview.
-- reaction_summary: top/most frequent stored final reactions.
-- reaction_export_csv: same, only when CSV export is explicitly requested.
-- fragment_search: find/count stored final fragments by formula or mass; no frame scan.
-- final_fragment_atoms: numbered atoms composing a stored final fragment.
-- final_fragment_bond_query: numbered atom pair or element pair ending in different
-  stored final fragments. User atom numbers are 1-based.
-- mass_spectrum: theoretical spectrum from stored fragments.
-- mass_spectrum_export_csv: spectrum plus explicit CSV export.
-- global_kinetics: calculate and store one kinetic condition on demand.
-- global_kinetics_export_csv: calculate/store one condition and export detailed CSV files.
-- compare_global_kinetics: calculate and compare kinetic groups.
-- stored_kinetics_summary: read previously stored kinetic constants only.
-- stored_kinetics_export_csv: export a compact CSV of previously stored kinetic
-  constants, including energy metadata from md_inputs. Never rescan frames.
-- stored_kinetics_detailed_export_csv: export the complete stored result for one
-  or more kinetic conditions as summary, events and survival-point CSV files.
-- global_kinetics: calculate and store one kinetic condition on demand.
-  Treat "global kinetics", "cinética global" and "k global" as equivalent.
-  Never recalculate or rescan frames.
-- fragment_first_appearance: scan frames for first persistent fragment appearance.
-- export_fragment_event_trajectory: export the trajectory selected by fragment event time.
-- export_trajectory: export by exact traj_uid or metadata selection.
-- export_trajectory_with_fragment: export one trajectory containing a fragment.
-- export_all_trajectories_with_fragment: export every matching trajectory.
-- global_kinetics_export_csv: calculate/store one condition and export detailed CSV files.
-  Treat "export the global k", "exporta la k global" and
-  "exporta la cinética global" as equivalent.
-
-Rules:
-1. The user may write in English or Spanish.
-2. Use only catalogue values below; matching is case-insensitive.
-3. Use null for unspecified filters. Never infer an isomer unless explicitly stated.
-4. A value beginning with traj_ is a trajectory UID.
-5. Never choose an export action unless export/save/extract is explicit.
-6. For stored final-fragment questions, do not choose any-frame scanning.
-7. fragment_scope is final_frame, any_frame, or persistent.
-8. selection is first, last, random, longest, shortest, earliest, or latest.
-9. Keep arguments minimal: include only fields needed for the selected action.
-
-Required JSON form:
-{{"action":"action_name","arguments":{{}}}}
-
-Examples:
-User: Give me a general overview of the database.
-Assistant: {{"action":"database_summary","arguments":{{}}}}
-User: Show the 20 most frequent final reactions for Azaconazole at ZPEx3.
-Assistant: {{"action":"reaction_summary","arguments":{{"molecule":"Azaconazole","energy_label":"ZPEx3","top_n":20}}}}
-User: Which numbered atoms form final fragment C2H3N3 for Azaconazole PM6 ZPEx3?
-Assistant: {{"action":"final_fragment_atoms","arguments":{{"formula":"C2H3N3","molecule":"Azaconazole","method":"PM6","energy_label":"ZPEx3"}}}}
-User: Export trajectory traj_abc123.
-Assistant: {{"action":"export_trajectory","arguments":{{"traj_uid":"traj_abc123"}}}}
-User: Show the complete stored input for trajectory traj_abc123.
-Assistant: {{"action":"show_input","arguments":{{"traj_uid":"traj_abc123"}}}}
-User: Restore the input for trajectory traj_abc123 as azaconazole_md.in.
-Assistant: {{"action":"restore_input","arguments":{{"traj_uid":"traj_abc123","filename":"azaconazole_md.in"}}}}
-User: Summarise stored kinetic constants for Azaconazole and Tebuconazole at ZPEx3 for PM6 and uB3LYP. Do not recalculate.
-Assistant: {{"action":"stored_kinetics_summary","arguments":{{}}}}
-User: Export stored kinetic constants for Azaconazole and Tebuconazole at ZPEx3 to CSV. Do not recalculate.
-Assistant: {{"action":"stored_kinetics_export_csv","arguments":{{}}}}
-
-AVAILABLE_DATABASE_VALUES={catalog_json}
-<|im_end|>
-<|im_start|>user
-{question}
-<|im_end|>
-<|im_start|>assistant
-"""
 
 def llama_server_healthcheck(
     base_url: str,

@@ -267,10 +267,26 @@ bash scripts/smoke_test.sh
 
 All language model inference is performed locally.
 
+## Customising the AI prompts
+
+The model instructions are editable UTF-8 files:
+
+- `prompts/router.txt`: selects an existing action and its arguments.
+- `prompts/sql_generation.txt`: generates read-only SQLite queries.
+- `prompts/sql_repair.txt`: repairs a rejected query using the SQLite error.
+
+Edit these files to adapt instructions and examples. Changes are read on the
+next request that uses the corresponding prompt; restarting llama-server is
+not required. Keep the template variables and the required JSON or SQL output
+format. Adding a new scientific operation also requires a Python implementation.
+
+See [Editing the prompts](README_prompts.md) for the template variables,
+examples and validation commands.
+
 ## Documentation
 
 - `README_sqlisto_agent.md`: AI assistant documentation.
-- `README_prompts.md`: prompt examples and usage instructions.
+- [README_prompts.md](README_prompts.md): editing the agent and SQL prompts.
 - `docs/tested_environment.md`: tested software configuration.
 
 ## Scientific Context
